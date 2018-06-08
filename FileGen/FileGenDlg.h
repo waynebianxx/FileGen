@@ -31,4 +31,11 @@ protected:
 	afx_msg void OnPaint();
 	afx_msg HCURSOR OnQueryDragIcon();
 	DECLARE_MESSAGE_MAP()
+public:
+	afx_msg void OnBnClickedButtonPath();
+	int m_FileNum;
+	CString m_strPath;
+	CString SelFilePath();
+	void GenFiles(CString strPath, const int FNum);
+	afx_msg void OnBnClickedOk();
 };
