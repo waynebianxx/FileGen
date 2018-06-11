@@ -36,6 +36,9 @@
     <ClInclude Include="CAST_SrcData.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="ShowAuxlDataDlg.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FileGen.cpp">
@@ -48,6 +51,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="CAST_SrcData.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ShowAuxlDataDlg.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

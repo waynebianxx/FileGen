@@ -10,8 +10,9 @@
 #include <random>
 #include <stdio.h>
 #include <string>
-#include "CAST_SrcData.h"
 using namespace std;
+
+#include "ShowAuxlDataDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -68,6 +69,7 @@ void CFileGenDlg::DoDataExchange(CDataExchange* pDX)
 	CDialogEx::DoDataExchange(pDX);
 	DDX_Text(pDX, IDC_EDIT_FILENUM, m_FileNum);
 	DDX_Text(pDX, IDC_EDIT_SAVEPATH, m_strPath);
+	DDX_Control(pDX, IDC_LIST_AUXLDATA, m_AuxList);
 }
 
 BEGIN_MESSAGE_MAP(CFileGenDlg, CDialogEx)
@@ -76,6 +78,7 @@ BEGIN_MESSAGE_MAP(CFileGenDlg, CDialogEx)
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BUTTON_PATH, &CFileGenDlg::OnBnClickedButtonPath)
 	ON_BN_CLICKED(IDOK, &CFileGenDlg::OnBnClickedOk)
+	ON_BN_CLICKED(IDC_SHOW_AUX, &CFileGenDlg::OnBnClickedShowAux)
 END_MESSAGE_MAP()
 
 
@@ -111,29 +114,7 @@ BOOL CFileGenDlg::OnInitDialog()
 	SetIcon(m_hIcon, FALSE);		// 设置小图标
 
 	// TODO: 在此添加额外的初始化代码
-
-// 	CRect rect;
-// 	// 获取编程语言列表视图控件的位置和大小   
-// 	m_programLangList.GetClientRect(&rect);
-// 	// 为列表视图控件添加全行选中和栅格风格   
-// 	m_programLangList.SetExtendedStyle(m_programLangList.GetExtendedStyle() | LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
-// 	// 为列表视图控件添加三列   
-// 	m_programLangList.InsertColumn(0, _T("语言"), LVCFMT_CENTER, rect.Width() / 3, 0);
-// 	m_programLangList.InsertColumn(1, _T("2012.02排名"), LVCFMT_CENTER, rect.Width() / 3, 1);
-// 	m_programLangList.InsertColumn(2, _T("2011.02排名"), LVCFMT_CENTER, rect.Width() / 3, 2);
-// 	// 在列表视图控件中插入列表项，并设置列表子项文本   
-// 	m_programLangList.InsertItem(0, _T("Java"));
-// 	m_programLangList.SetItemText(0, 1, _T("1"));
-// 	m_programLangList.SetItemText(0, 2, _T("1"));
-// 	m_programLangList.InsertItem(1, _T("C"));
-// 	m_programLangList.SetItemText(1, 1, _T("2"));
-// 	m_programLangList.SetItemText(1, 2, _T("2"));
-// 	m_programLangList.InsertItem(2, _T("C#"));
-// 	m_programLangList.SetItemText(2, 1, _T("3"));
-// 	m_programLangList.SetItemText(2, 2, _T("6"));
-// 	m_programLangList.InsertItem(3, _T("C++"));
-// 	m_programLangList.SetItemText(3, 1, _T("4"));
-// 	m_programLangList.SetItemText(3, 2, _T("3"));
+	GetDlgItem(IDC_SHOW_AUX)->ShowWindow(SW_HIDE);
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -228,34 +209,73 @@ CString CFileGenDlg::SelFilePath()
 	return strFolderPath;
 }
 
+void CFileGenDlg::HEADCfg(HEAD_INFO& HdInfo, int& MemSize)
+{
+	MemSize = sizeof(HdInfo.m_AllData);
+	HdInfo.SubData.m_HeadIdent[0] = 'I';
+	HdInfo.SubData.m_HeadIdent[1] = 'F';
+	HdInfo.SubData.m_HeadIdent[2] = 'H';
+	HdInfo.SubData.m_HeadLen[0] = 177 & 0xff;
+	HdInfo.SubData.m_HeadLen[1] = 177 >> 8;
+	HdInfo.SubData.m_FileFmt[0] = 'r';
+	HdInfo.SubData.m_FileFmt[1] = 'a';
+	HdInfo.SubData.m_FileFmt[2] = 'w';
+	HdInfo.SubData.m_DataBitWidth[0] = 8;
+	HdInfo.SubData.m_DataBitWidth[1] = 0;
+	HdInfo.SubData.m_HeadReserv[0] = 0;
+	HdInfo.SubData.m_HeadReserv[1] = 0;
+	HdInfo.SubData.m_HeadReserv[2] = 0;
+	int imgw = rand() % 1921;
+	int imgh = rand() % 1081;
+	memcpy(HdInfo.SubData.m_ImgWidth, &imgw, 3);
+	memcpy(HdInfo.SubData.m_ImgHeight, &imgh, 3);
+	return;
+}
+void CFileGenDlg::AUXLCfg(AUXIL_DATA& AuxData, int& MemSize)
+{
+	MemSize = sizeof(AuxData.m_AllData);
+	for (int i = 0; i != MemSize; ++i)
+		AuxData.m_AllData[i] = rand() % 0x100;
+	return;
+}
+void CFileGenDlg::IMGDATACfg(void* pData, int& MemSize)
+{
+	srand((unsigned)time(NULL));
+	BYTE* pDataTmp = (BYTE*)pData;
+	for (int i = 0; i != MemSize; ++i)
+		pDataTmp[i] = rand() % 0x100;
+	return;
+}
+
 void CFileGenDlg::GenFiles(CString strPath, const int FNum)
 {
-	int len1 = 19, len2 = 158, len3 = 1920 * 1080;
+	int len1 = 0, len2 = 0, len3 = 0;
 	HEAD_INFO hdInf;
 	AUXIL_DATA auxDt;
-	BYTE* ImgData = new BYTE[len3];
 	char fName[64] = { 0 };
 	FILE* pF=nullptr;
+	srand((unsigned)time(NULL));
 	for (int i=0;i!=FNum;++i)
 	{
-		srand((unsigned)time(NULL));
-		for (int l = 0; l != len1; ++l)
-			hdInf.m_AllData[l] = rand() % 0x100;
-		for (int l = 0; l != len2; ++l)
-			auxDt.m_AllData[l] = rand() % 0x100;
-		for (int l = 0; l != len3; ++l)
-			ImgData[l] = rand() % 0x100;
+		HEADCfg(hdInf, len1);
+		AUXLCfg(auxDt, len2);
+		int imgw = 0, imgh = 0;
+		memcpy(&imgw, hdInf.SubData.m_ImgWidth, 3);
+		memcpy(&imgh, hdInf.SubData.m_ImgHeight, 3);
+		len3 = imgw*imgh;
+		BYTE* ImgData = new BYTE[len3];
+		IMGDATACfg(ImgData, len3);
 		string strFPath = CT2A(strPath.GetBuffer(0));
 		sprintf_s(fName, "%s\\%d", strFPath.c_str(), i);
 		fopen_s(&pF, fName, "w+");
 		fwrite(hdInf.m_AllData, 1, len1, pF);
 		fwrite(auxDt.m_AllData, 1, len2, pF);
 		fwrite(ImgData, 1, len3, pF);
+		delete[]ImgData;
 		fclose(pF);
 		pF = nullptr;
 		memset(fName, 0, 64);
 	}
-	delete[]ImgData;
 	return;
 }
 
@@ -265,4 +285,28 @@ void CFileGenDlg::OnBnClickedOk()
 	CDialogEx::OnOK();
 	UpdateData(TRUE);
 	GenFiles(m_strPath, m_FileNum);
+}
+
+
+void CFileGenDlg::OnBnClickedShowAux()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	CAST_IMG catimg;
+	BYTE* pFData = NULL;
+	HEAD_INFO tmphdif;
+	AUXIL_DATA tmpauxdt;
+	AuxDlg.Create(IDD_DIALOG_AUXLSHOW, NULL);
+	char fname[64] = { 0 };
+	for (int i=0;i!=100;++i)
+	{
+		sprintf_s(fname, "E:\\my_vs_project\\CAST\\src_data\\%d", i);
+		catimg.ReadFile(fname, pFData);
+		memcpy(tmphdif.m_AllData, pFData, sizeof(tmphdif.m_AllData));
+		memcpy(tmpauxdt.m_AllData, pFData + sizeof(tmphdif.m_AllData), sizeof(tmpauxdt.m_AllData));
+		delete[]pFData;
+		pFData = NULL;
+		memset(fname, 0, 64);
+		AuxDlg.ListInsert(tmphdif, tmpauxdt);
+	}
+	AuxDlg.ShowWindow(SW_SHOW);
 }

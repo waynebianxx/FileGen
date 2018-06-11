@@ -189,6 +189,7 @@
     <ClInclude Include="FileGen.h" />
     <ClInclude Include="FileGenDlg.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="ShowAuxlDataDlg.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
@@ -196,6 +197,7 @@
     <ClCompile Include="CAST_SrcData.cpp" />
     <ClCompile Include="FileGen.cpp" />
     <ClCompile Include="FileGenDlg.cpp" />
+    <ClCompile Include="ShowAuxlDataDlg.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

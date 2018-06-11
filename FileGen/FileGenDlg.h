@@ -4,6 +4,9 @@
 
 #pragma once
 
+#include "ShowAuxlDataDlg.h"
+#include "CAST_SrcData.h"
+#include "afxcmn.h"
 
 // CFileGenDlg ¶Ô»°¿ò
 class CFileGenDlg : public CDialogEx
@@ -38,4 +41,10 @@ public:
 	CString SelFilePath();
 	void GenFiles(CString strPath, const int FNum);
 	afx_msg void OnBnClickedOk();
+	void HEADCfg(HEAD_INFO& HdInfo, int& MemSize);
+	void AUXLCfg(AUXIL_DATA& HdInfo, int& MemSize);
+	void IMGDATACfg(void* pData, int& MemSize);
+	CListCtrl m_AuxList;
+	ShowAuxlDataDlg AuxDlg;
+	afx_msg void OnBnClickedShowAux();
 };
